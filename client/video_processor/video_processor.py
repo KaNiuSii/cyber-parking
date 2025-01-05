@@ -1,6 +1,7 @@
 from typing import List
 import cv2
 import effects.background_removal
+import effects.color_filter
 import effects.ieffect
 from video_processor.video import Video
 import effects
@@ -25,4 +26,4 @@ class VideoProcessor:
         self.video.close_video()
 
     def register_effects(self) -> List[effects.ieffect.IEffect]:
-        return [effects.background_removal.BackgroundRemoval()]
+        return [effects.color_filter.ColorFilter()]
