@@ -5,9 +5,9 @@ import numpy as np
 
 class Video:
     def __init__(self, video_path: str):
-        self.video_path: Path = self.get_file_path(video_path)  # Type hint for video_path
-        self.cap: Optional[cv2.VideoCapture] = None  # Optional, as it will be initialized later
-        self.is_open: bool = False  # Type hint for is_open
+        self.video_path: Path = self.get_file_path(video_path)
+        self.cap: Optional[cv2.VideoCapture] = None
+        self.is_open: bool = False
 
     def get_file_path(self, video_name: str) -> Path:
         parent_dir: Path = Path('.').absolute()
