@@ -2,7 +2,7 @@ import cv2
 from typing import List
 from pathlib import Path
 
-class VideoProcessor:
+class Video:
     def __init__(self, video_path: str):
         self.video_path = self.get_file_path(video_path)
         self.cap = None

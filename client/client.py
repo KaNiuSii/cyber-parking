@@ -1,10 +1,10 @@
 import cv2
-from video_processor.video_processor import VideoProcessor
+from video_processor.video import Video
 
 
 
 def main():
-    video_processor = VideoProcessor('1.mp4')
+    video_processor = Video('1.mp4')
     video_processor.open_video()
 
     while True:
