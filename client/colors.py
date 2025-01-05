@@ -12,5 +12,8 @@ class Colors:
     RED_UPPER2 = np.array([180, 255, 255])
 
     # BGR colors for yellow and red
-    YELLOW_BGR = (0, 255, 255)  # Yellow in BGR format
-    RED_BGR = (0, 0, 255)  # Red in BGR format
+    #             B     G       R
+    YELLOW_BGR = (0,    255,    255)
+    RED_BGR =    (0,    0,      255)
+    PURPLE_BGR =  (145,  45,     92)
+

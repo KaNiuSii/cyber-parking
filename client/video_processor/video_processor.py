@@ -2,6 +2,7 @@ from typing import List
 import cv2
 import effects.background_removal
 import effects.color_filter
+import effects.car_positions
 import effects.ieffect
 from video_processor.video import Video
 import effects
@@ -26,4 +27,7 @@ class VideoProcessor:
         self.video.close_video()
 
     def register_effects(self) -> List[effects.ieffect.IEffect]:
-        return [effects.color_filter.ColorFilter()]
+        return [
+                effects.color_filter.ColorFilter(),
+                effects.car_positions.CarPositions()
+            ]
