@@ -2,7 +2,7 @@ from typing import Optional
 import cv2
 import numpy as np
 from effects.ieffect import IEffect
-from colors import Colors  # Import the color signatures
+from colors import Colors
 
 class ColorFilter(IEffect):
     def __init__(self):
