@@ -29,8 +29,8 @@ class ParkingSpaces(IEffect):
                 x, y, w, h = cv2.boundingRect(contour)
                 position = (x + w // 2, y + h // 2)
 
-                cv2.rectangle(frame, (x, y), (x + w, y + h), Colors.BLACK_BGR, 2)
+                cv2.rectangle(frame, (x, y), (x + w, y + h), Colors.PURPLE_BGR, 2)
                 cv2.putText(frame, f"{position}", (x, y + h // 2),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, Colors.BLACK_BGR, 1, cv2.LINE_AA)
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.4, Colors.PURPLE_BGR, 1, cv2.LINE_AA)
 
         return frame
