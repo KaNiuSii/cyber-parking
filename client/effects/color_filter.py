@@ -16,11 +16,13 @@ class ColorFilter(IEffect):
 
         yellow_mask = self.create_color_mask(hsv, "yellow")
         red_mask = self.create_color_mask(hsv, "red")
+        green_mask = self.create_color_mask(hsv, "green")
 
         result = np.zeros_like(frame)
 
         result[yellow_mask == 255] = Colors.YELLOW_BGR
-        result[red_mask == 255] = Colors.RED_BGR
+        result[red_mask == 255]   = Colors.RED_BGR
+        result[green_mask == 255] = Colors.GREEN_BGR
 
         return result
 
@@ -34,4 +36,7 @@ class ColorFilter(IEffect):
             red_mask1 = self.create_mask(hsv, Colors.RED_LOWER1, Colors.RED_UPPER1)
             red_mask2 = self.create_mask(hsv, Colors.RED_LOWER2, Colors.RED_UPPER2)
             return cv2.bitwise_or(red_mask1, red_mask2)
-        return np.zeros_like(hsv)
+        elif color == "green":
+            return self.create_mask(hsv, Colors.GREEN_LOWER, Colors.GREEN_UPPER)
+        else:
+            return np.zeros_like(hsv)

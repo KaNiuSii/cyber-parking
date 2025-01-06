@@ -4,8 +4,7 @@ import effects.background_removal
 import effects.color_filter
 import effects.car_positions
 import effects.ieffect
-import effects.praking_space_creator
-import effects.monitor_parking_space
+import effects.parking_spaces
 from video_processor.video import Video
 import effects
 
@@ -32,6 +31,5 @@ class VideoProcessor:
         return [
                 effects.color_filter.ColorFilter(),
                 effects.car_positions.CarPositions(),
-                effects.praking_space_creator.ParkingSpaceCreate(),
-                effects.monitor_parking_space.ParkingSpaceChecker()
+                effects.parking_spaces.ParkingSpaces()
             ]
