@@ -4,6 +4,7 @@ import effects.background_removal
 import effects.color_filter
 import effects.car_positions
 import effects.ieffect
+import effects.parking_spaces
 from video_processor.video import Video
 import effects
 
@@ -29,5 +30,6 @@ class VideoProcessor:
     def register_effects(self) -> List[effects.ieffect.IEffect]:
         return [
                 effects.color_filter.ColorFilter(),
-                effects.car_positions.CarPositions()
+                effects.car_positions.CarPositions(),
+                effects.parking_spaces.ParkingSpaces()
             ]
