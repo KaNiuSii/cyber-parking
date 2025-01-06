@@ -27,7 +27,7 @@ class CarPositions(IEffect):
         contours, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         for contour in contours:
-            if cv2.contourArea(contour) > 1000:
+            if cv2.contourArea(contour) > 2500:
                 x, y, w, h = cv2.boundingRect(contour)
                 car_position = (x + w // 2, y + h // 2)
 
