@@ -1,9 +1,9 @@
 from typing import List
 import cv2
 import effects.color_filter
-import effects.car_positions
+from effects.car_positions import CarPositions
 import effects.ieffect
-import effects.parking_spaces
+from effects.parking_spaces import ParkingSpaces
 from video_processor.video import Video
 from effects.ieffect import IEffect 
 from models.data_frame import DataFrame
@@ -33,6 +33,6 @@ class VideoProcessor:
     def register_effects(self) -> List[IEffect]:
         return [
                 # effects.color_filter.ColorFilter(),
-                effects.car_positions.CarPositions(),
-                effects.parking_spaces.ParkingSpaces()
+                CarPositions(),
+                ParkingSpaces()
             ]
