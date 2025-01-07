@@ -1,14 +1,16 @@
-from typing import Optional
+from typing import List, Optional
 import cv2
 import numpy as np
 from effects.ieffect import IEffect
 from colors import Colors
+from models.data_frame import DataFrame
 
 class CarPositions(IEffect):
     def __init__(self):
         pass
 
-    def apply(self, frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
+    def apply(self, frame: Optional[np.ndarray], 
+            dataframes: List[DataFrame]) -> DataFrame:
         if frame is None:
             return None
 
@@ -18,7 +20,7 @@ class CarPositions(IEffect):
         red_mask2 = self.create_mask(hsv, Colors.RED_LOWER2, Colors.RED_UPPER2)
         red_mask = cv2.bitwise_or(red_mask1, red_mask2)
 
-        return self.detect_car_positions(frame, red_mask)
+        return DataFrame(frame=self.detect_car_positions(frame, red_mask), data=dataframes[::-1])
 
     def create_mask(self, hsv: np.ndarray, lower: np.ndarray, upper: np.ndarray) -> np.ndarray:
         return cv2.inRange(hsv, lower, upper)

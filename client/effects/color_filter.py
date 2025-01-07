@@ -1,17 +1,22 @@
-from typing import Optional
+from typing import List, Optional
 import cv2
 import numpy as np
 from effects.ieffect import IEffect
 from colors import Colors
+from models.data import Data
+from models.data_frame import DataFrame
 
 class ColorFilter(IEffect):
     def __init__(self):
         pass
 
-    def apply(self, frame: Optional[np.ndarray]) -> Optional[np.ndarray]:
+    def apply(self, frame: Optional[np.ndarray], 
+            dataframes: List[DataFrame]) -> DataFrame:
         if frame is None:
             return None
         
+        data: Data = Data(parking_spaces=[], car_positions=[])
+
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         yellow_mask = self.create_color_mask(hsv, "yellow")
@@ -24,7 +29,7 @@ class ColorFilter(IEffect):
         result[red_mask == 255]   = Colors.RED_BGR
         result[green_mask == 255] = Colors.GREEN_BGR
 
-        return result
+        return DataFrame(frame=frame, data=data)
 
     def create_mask(self, hsv: np.ndarray, lower: np.ndarray, upper: np.ndarray) -> np.ndarray:
         return cv2.inRange(hsv, lower, upper)
