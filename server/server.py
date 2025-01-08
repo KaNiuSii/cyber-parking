@@ -1,40 +1,45 @@
-from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+import time
 from typing import List
+from fastapi import FastAPI, HTTPException
+from models.data import Data
+from models.parking_space import ParkingSpace
+from models.car_position import CarPosition
+from workers.iworker import IWorker
+from workers.parked import Parked
 
 app = FastAPI()
 
-# Models
-class ParkingSpot(BaseModel):
-    id: int
-    status: str  # e.g., "occupied", "available"
+data_store: List[List[Data]] = []
 
-class CreateParkingRequest(BaseModel):
-    total_spots: int
+workers: List[IWorker] = [
+    Parked()
+]
 
-class UpdateParkingRequest(BaseModel):
-    spot_updates: List[ParkingSpot]
+@app.post("/create_parking_data")
+async def create_parking_data(parking_spaces: List[ParkingSpace], car_positions: List[CarPosition]):
+    new_data = Data(
+        id=len(data_store),
+        parking_spaces=parking_spaces,
+        car_positions=car_positions,
+        server_response={"parked": 0}
+    )
+    data_store.append([new_data])
+    return {"data": new_data}
 
-# In-memory data store
-parking_lot = {}
+@app.post("/update_parking_data")
+async def update_parking_data(new_data: Data):
+    if new_data.id >= len(data_store) or not data_store[new_data.id]:
+        raise HTTPException(status_code=404, detail="No parking data exists to update")
 
-# Endpoints
-@app.post("/create_parking")
-async def create_parking(request: CreateParkingRequest):
-    if parking_lot:
-        raise HTTPException(status_code=400, detail="Parking lot already created")
-    parking_lot.update({i: "available" for i in range(1, request.total_spots + 1)})
-    return {"message": "Parking lot created", "total_spots": len(parking_lot)}
+    # print(new_data)
+    # time.sleep(1)
 
-@app.post("/update_parking")
-async def update_parking(request: UpdateParkingRequest):
-    for spot in request.spot_updates:
-        if spot.id not in parking_lot:
-            raise HTTPException(status_code=404, detail=f"Spot ID {spot.id} not found")
-        parking_lot[spot.id] = spot.status
-    return {"message": "Parking lot updated", "updated_spots": request.spot_updates}
+    data_chain: List[Data] = data_store[new_data.id]
 
-# Endpoint to check the parking lot state (for testing)
-@app.get("/parking_status")
-async def parking_status():
-    return parking_lot
+    for worker in workers:
+        new_data = worker.apply(data_chain=data_chain, new_data=new_data)
+
+    data_store[new_data.id].append(new_data)
+    return {"data": new_data}
+
+

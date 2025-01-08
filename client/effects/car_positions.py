@@ -4,37 +4,43 @@ import numpy as np
 from effects.ieffect import IEffect
 from colors import Colors
 from models.data_frame import DataFrame
+from models.data import Data, CarPosition
 
 class CarPositions(IEffect):
-    def __init__(self):
-        pass
-
-    def apply(self, frame: Optional[np.ndarray], 
-            dataframes: List[DataFrame]) -> DataFrame:
+    def apply(self, frame: Optional[np.ndarray], dataframes: List[DataFrame]) -> DataFrame:
         if frame is None:
-            return None
+            raise ValueError("Frame is None. Cannot process.")
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         red_mask1 = self.create_mask(hsv, Colors.RED_LOWER1, Colors.RED_UPPER1)
         red_mask2 = self.create_mask(hsv, Colors.RED_LOWER2, Colors.RED_UPPER2)
         red_mask = cv2.bitwise_or(red_mask1, red_mask2)
+        red_mask = cv2.morphologyEx(red_mask, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
 
-        return DataFrame(frame=self.detect_car_positions(frame, red_mask), data=dataframes[::-1])
+        detected_frame, car_positions = self.detect_car_positions(frame, red_mask)
+
+        updated_data = dataframes[-1]
+        updated_data.data.car_positions = car_positions
+
+        return DataFrame(frame=detected_frame, data=updated_data.data)
 
     def create_mask(self, hsv: np.ndarray, lower: np.ndarray, upper: np.ndarray) -> np.ndarray:
         return cv2.inRange(hsv, lower, upper)
 
-    def detect_car_positions(self, frame: np.ndarray, red_mask: np.ndarray) -> np.ndarray:
+    def detect_car_positions(self, frame: np.ndarray, red_mask: np.ndarray):
         contours, _ = cv2.findContours(red_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        car_positions = []
 
         for contour in contours:
-            if cv2.contourArea(contour) > 2500:
+            if cv2.contourArea(contour) > 1500 and cv2.contourArea(contour) < 4000:
                 x, y, w, h = cv2.boundingRect(contour)
-                car_position = (x + w // 2, y + h // 2)
+                car_position = CarPosition(name=f"Car_{x}_{y}", x=x + w // 2, y=y + h // 2, w=w, h=h)
+                car_positions.append(car_position)
 
                 cv2.rectangle(frame, (x, y), (x + w, y + h), Colors.PURPLE_BGR, 2)
-                cv2.putText(frame, f"Position: {car_position}", (x, y - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.7, Colors.PURPLE_BGR, 2, cv2.LINE_AA)
+                cv2.putText(frame, f"Car_{x}_{y}", (x, y - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, Colors.PURPLE_BGR, 2)
 
-        return frame
+        print(f"Detected car positions: {[f'({car.x}, {car.y})' for car in car_positions]}")
+        return frame, car_positions
