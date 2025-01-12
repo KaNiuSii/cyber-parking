@@ -1,5 +1,6 @@
 from typing import List
 import cv2
+import numpy as np
 import requests
 from effects.car_names import CarNames
 from effects.car_positions import CarPositions
@@ -25,41 +26,83 @@ class VideoProcessor:
             frame = self.video.get_next_frame()
             if frame is None:
                 break
-            dataframe: DataFrame = DataFrame(frame=frame, data=Data(car_positions=[], parking_spaces=[], id=self.data_id, server_response=ServerResponse(parked=0)))
+
+            dataframe: DataFrame = DataFrame(
+                frame=frame,
+                data=Data(
+                    id=self.data_id,
+                    car_positions=[],
+                    parking_spaces=[],
+                    server_response=ServerResponse(parked=0, not_moving=[])
+                )
+            )
             self.dataframes.append(dataframe)
             for effect in self.effects:
                 dataframe = effect.apply(frame, self.dataframes)
                 self.dataframes.append(dataframe)
 
-            update_payload = {
-                "id": self.data_id,
-                "parking_spaces": [
-                    {"id": ps.id, "x": ps.x, "y": ps.y, "h": ps.h, "w": ps.w} for ps in dataframe.data.parking_spaces
-                ],
-                "car_positions": [
-                    {"name": cp.name, "x": cp.x, "y": cp.y, "h": cp.h, "w": cp.w} for cp in dataframe.data.car_positions
-                ],
-                "server_response": {"parked": 0}
-            }
+            update_payload = self.dataframes[-1].data.model_dump()
 
             response = requests.post(f"{self.api_url}/update_parking_data", json=update_payload)
-            server_data = response.json().get("data")
+            server_data = Data.model_validate(response.json()["data"])
 
-            cv2.putText(
-                frame,
-                f"Parked Cars: {server_data['server_response']['parked']}",
-                (10, 30),
-                cv2.FONT_HERSHEY_SIMPLEX,
-                1,
-                (0, 255, 0),
-                2
-            )
+            response_frame = self.write_server_response(server_data.server_response)
 
-            cv2.imshow('Frame', frame)
+            cv2.imshow('Main Frame', frame)
+            cv2.imshow('Server Response', response_frame)
+
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
         self.video.close_video()
+
+
+    def write_server_response(self, resp: ServerResponse) -> np.ndarray:
+        frame_width, frame_height = 400, 300
+        response_frame = np.zeros((frame_height, frame_width, 3), dtype=np.uint8)
+
+        y_offset = 30
+        line_height = 30
+
+        text = "Server Response:"
+        cv2.putText(
+            response_frame,
+            text,
+            (10, y_offset),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.8,
+            (255, 255, 255),
+            2
+        )
+        y_offset += line_height
+
+        text = f"Parked: {resp.parked}"
+        cv2.putText(
+            response_frame,
+            text,
+            (10, y_offset),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (255, 255, 255),
+            1
+        )
+        y_offset += line_height
+
+        text = f"Not Moving: {', '.join(resp.not_moving)}"
+        cv2.putText(
+            response_frame,
+            text,
+            (10, y_offset),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.7,
+            (255, 255, 255),
+            1
+        )
+
+        return response_frame
+
+
+
 
     def register_effects(self) -> List[IEffect]:
         return [

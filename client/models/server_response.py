@@ -3,3 +3,4 @@ from pydantic import BaseModel
 
 class ServerResponse(BaseModel):
     parked: int
+    not_moving: List[str]
