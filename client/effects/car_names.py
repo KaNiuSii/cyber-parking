@@ -6,10 +6,11 @@ from colors import Colors
 from models.data_frame import DataFrame
 from models.data import Data, CarPosition
 
-accepted_x_diff = 10
-accepted_y_diff = 10
 
 class CarNames(IEffect):
+    ACCEPTED_Y_DIFF = 10
+    ACCEPTED_X_DIFF = 10
+
     def __init__(self):
         self.car_number = 0
         self.lost_cars = []
@@ -28,15 +29,19 @@ class CarNames(IEffect):
 
     def write_car_positions(self, frame: np.ndarray, car_positions: List[CarPosition]):
         for car_position in car_positions:
-            cv2.rectangle(frame, (car_position.x - car_position.w // 2, car_position.y - car_position.h // 2), (car_position.x + car_position.w // 2, car_position.y + car_position.h // 2), Colors.PURPLE_BGR, 2)
-            cv2.putText(frame, car_position.name, (car_position.x, car_position.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, Colors.PURPLE_BGR, 2)
+            cv2.rectangle(frame, (car_position.x - car_position.w // 2, car_position.y - car_position.h // 2),
+                          (car_position.x + car_position.w // 2, car_position.y + car_position.h // 2),
+                          Colors.PURPLE_BGR, 2)
+            cv2.putText(frame, car_position.name, (car_position.x, car_position.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                        Colors.PURPLE_BGR, 2)
 
         print(f"Detected car positions: {[f'{car.name}({car.x}, {car.y})' for car in car_positions]}")
 
         return frame
 
     def is_same_car(self, car_position: CarPosition, last_car_position: CarPosition) -> bool:
-        return abs(car_position.x - last_car_position.x) < accepted_x_diff and abs(car_position.y - last_car_position.y) < accepted_y_diff
+        return abs(car_position.x - last_car_position.x) < self.ACCEPTED_Y_DIFF and abs(
+            car_position.y - last_car_position.y) < self.ACCEPTED_X_DIFF
 
     def assign_car_names(self, car_positions: List[CarPosition], last_car_positions: List[CarPosition]):
         cars_not_found: List[CarPosition] = last_car_positions.copy()
@@ -62,6 +67,3 @@ class CarNames(IEffect):
         self.lost_cars.extend(cars_not_found)
 
         return car_positions
-
-
-
