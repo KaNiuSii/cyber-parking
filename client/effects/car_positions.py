@@ -35,12 +35,7 @@ class CarPositions(IEffect):
         for contour in contours:
             if cv2.contourArea(contour) > 1500 and cv2.contourArea(contour) < 4000:
                 x, y, w, h = cv2.boundingRect(contour)
-                car_position = CarPosition(name=f"Car_{x}_{y}", x=x + w // 2, y=y + h // 2, w=w, h=h)
+                car_position = CarPosition(name=f"Unknown", x=x + w // 2, y=y + h // 2, w=w, h=h)
                 car_positions.append(car_position)
 
-                cv2.rectangle(frame, (x, y), (x + w, y + h), Colors.PURPLE_BGR, 2)
-                cv2.putText(frame, f"Car_{x}_{y}", (x, y - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX, 0.5, Colors.PURPLE_BGR, 2)
-
-        print(f"Detected car positions: {[f'({car.x}, {car.y})' for car in car_positions]}")
         return frame, car_positions
