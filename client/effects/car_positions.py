@@ -5,6 +5,8 @@ from effects.ieffect import IEffect
 from colors import Colors
 from models.data_frame import DataFrame
 from models.data import Data, CarPosition
+from consts import Consts
+
 
 class CarPositions(IEffect):
     def apply(self, frame: Optional[np.ndarray], dataframes: List[DataFrame]) -> DataFrame:
@@ -35,7 +37,7 @@ class CarPositions(IEffect):
         for contour in contours:
             if cv2.contourArea(contour) > 1500 and cv2.contourArea(contour) < 4000:
                 x, y, w, h = cv2.boundingRect(contour)
-                car_position = CarPosition(name=f"Unknown", x=x + w // 2, y=y + h // 2, w=w, h=h)
+                car_position = CarPosition(name=Consts.UNKNOWN, x=x + w // 2, y=y + h // 2, w=w, h=h)
                 car_positions.append(car_position)
 
         return frame, car_positions

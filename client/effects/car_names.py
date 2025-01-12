@@ -5,7 +5,7 @@ from effects.ieffect import IEffect
 from colors import Colors
 from models.data_frame import DataFrame
 from models.data import Data, CarPosition
-
+from consts import Consts
 
 class CarNames(IEffect):
     ACCEPTED_Y_DIFF = 10
@@ -35,8 +35,6 @@ class CarNames(IEffect):
             cv2.putText(frame, car_position.name, (car_position.x, car_position.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         Colors.PURPLE_BGR, 2)
 
-        print(f"Detected car positions: {[f'{car.name}({car.x}, {car.y})' for car in car_positions]}")
-
         return frame
 
     def is_same_car(self, car_position: CarPosition, last_car_position: CarPosition) -> bool:
@@ -53,14 +51,14 @@ class CarNames(IEffect):
                     cars_not_found.remove(last_car_position)
                     break
 
-            if car_position.name == "Unknown":
+            if car_position.name == Consts.UNKNOWN:
                 for lost_car in self.lost_cars:
                     if self.is_same_car(car_position, lost_car):
                         car_position.name = lost_car.name
                         self.lost_cars.remove(lost_car)
                         break
 
-                if car_position.name == "Unknown":
+                if car_position.name == Consts.UNKNOWN:
                     car_position.name = f"Car {self.car_number}"
                     self.car_number += 1
 

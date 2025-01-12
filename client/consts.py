@@ -1,0 +1,2 @@
+class Consts:
+    UNKNOWN = 'Unknown'
