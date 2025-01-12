@@ -1,6 +1,7 @@
 from typing import List
 import cv2
 import requests
+from effects.car_names import CarNames
 from effects.car_positions import CarPositions
 from effects.parking_spaces import ParkingSpaces
 from video_processor.video import Video
@@ -63,7 +64,8 @@ class VideoProcessor:
     def register_effects(self) -> List[IEffect]:
         return [
             CarPositions(),
-            ParkingSpaces()
+            ParkingSpaces(),
+            CarNames()
         ]
     
     def initialize_parking_data(self):
