@@ -71,7 +71,7 @@ class VideoProcessor:
 
         for key, value in text_data.items():
             if isinstance(value, list):
-                value_str = ",".join(map(str, value))
+                value_str = " | ".join(map(str, value))
             else:
                 value_str = str(value)
 

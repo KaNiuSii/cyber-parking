@@ -64,8 +64,8 @@ class ParkedNames(IWorker):
             average_spaces.append(
                 ParkingSpace(
                     id=space.id,            # Retain the original id
-                    x=int(avg_x / count),        # Average x position
-                    y=int(avg_y / count),        # Average y position
+                    x=int(avg_x / count),   # Average x position
+                    y=int(avg_y / count),   # Average y position
                     w=space.w,              # Retain the original width
                     h=space.h               # Retain the original height
                 )
