@@ -41,5 +41,4 @@ class ParkingSpaces(IEffect):
                 cv2.putText(frame, f"Space_{len(parking_spaces)}", (x, y - 10),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.5, Colors.GREEN_BGR, 2)
 
-        print(f"Detected parking spaces: {[f'({ps.x}, {ps.y})' for ps in parking_spaces]}")
         return parking_spaces
