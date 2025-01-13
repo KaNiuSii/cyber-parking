@@ -33,10 +33,12 @@ class VideoProcessor:
                     id=self.data_id,
                     car_positions=[],
                     parking_spaces=[],
-                    server_response=ServerResponse(parked=0, not_moving=[])
+                    server_response=ServerResponse(parked=0, not_moving=[], parked_names=[])
                 )
             )
+
             self.dataframes.append(dataframe)
+            
             for effect in self.effects:
                 dataframe = effect.apply(frame, self.dataframes)
                 self.dataframes.append(dataframe)
@@ -128,10 +130,13 @@ class VideoProcessor:
             "parking_spaces": [],
             "car_positions": []
         }
+
         response = requests.post(
             f"{self.api_url}/create_parking_data",
             json=initial_data
         )
-        response_data = response.json()
-        self.data_id = response_data["data"]["id"]
+
+        server_data = Data.model_validate(response.json()["data"])
+        self.data_id = server_data.id
+
         print(f"Initialized parking data with ID: {self.data_id}")

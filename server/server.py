@@ -8,6 +8,7 @@ from models.car_position import CarPosition
 from models.server_response import ServerResponse
 from workers.iworker import IWorker
 from workers.parked import Parked
+from workers.parked_names import ParkedNames
 from workers.not_moving import NotMoving
 
 
@@ -17,7 +18,8 @@ data_store: List[List[Data]] = []
 
 workers: List[IWorker] = [
     Parked(),
-    NotMoving()
+    NotMoving(),
+    ParkedNames()
 ]
 
 
@@ -30,7 +32,7 @@ async def create_parking_data(
         id=len(data_store),
         parking_spaces=parking_spaces,
         car_positions=car_positions,
-        server_response=ServerResponse(parked=0, not_moving=[])
+        server_response=ServerResponse(parked=0, not_moving=[], parked_names=[])
     )
     data_store.append([new_data])
     return {"data": new_data}
