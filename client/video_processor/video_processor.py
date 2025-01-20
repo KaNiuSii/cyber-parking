@@ -12,6 +12,7 @@ from models.data import Data
 from models.server_response import ServerResponse
 from effects.ieffect import IEffect
 from http_comm.http import Http
+from effects.license_plate_detector import LicensePlateDetector
 
 
 class VideoProcessor:
@@ -50,11 +51,11 @@ class VideoProcessor:
 
             response_frame = ServerResponseFrame.write_server_response(resp=response.server_response)
 
-            cv2.imshow('Main Frame', frame)
-            cv2.imshow('Server Response', response_frame)
-
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            # cv2.imshow('Main Frame', frame)
+            # cv2.imshow('Server Response', response_frame)
+            #
+            # if cv2.waitKey(1) & 0xFF == ord('q'):
+            #     break
 
         self.video.close_video()
 
@@ -62,7 +63,8 @@ class VideoProcessor:
         return [
             CarPositions(),
             ParkingSpaces(),
-            CarNames()
+            CarNames(),
+            LicensePlateDetector()
         ]
     
     

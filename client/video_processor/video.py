@@ -26,7 +26,10 @@ class Video:
     def close_video(self) -> None:
         if self.cap:
             self.cap.release()
-        cv2.destroyAllWindows()
+        try:
+            cv2.destroyAllWindows()
+        except cv2.error:
+            pass  # Ignore if windows can't be destroyed
         self.is_open = False
 
     def get_next_frame(self) -> Optional[np.ndarray]:
