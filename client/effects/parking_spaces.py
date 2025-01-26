@@ -13,8 +13,11 @@ class ParkingSpaces(IEffect):
             raise ValueError("Frame is None. Cannot process.")
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-        green_mask = self.create_mask(hsv, Colors.GREEN_LOWER, Colors.GREEN_UPPER)
+
+        green_mask = self.create_mask(hsv, 40, 85)
         green_mask = cv2.morphologyEx(green_mask, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+
+        # cv2.imshow('xd', green_mask)
 
         detected_parking_spaces = self.detect_parking_spaces(frame, green_mask)
 
@@ -23,8 +26,19 @@ class ParkingSpaces(IEffect):
 
         return DataFrame(frame=frame, data=updated_data.data)
 
-    def create_mask(self, hsv: np.ndarray, lower: np.ndarray, upper: np.ndarray) -> np.ndarray:
-        return cv2.inRange(hsv, lower, upper)
+    def create_mask(self, hsv: np.ndarray, h_lower: int, h_upper: int) -> np.ndarray:
+        if h_lower <= h_upper:
+            lower_bound = np.array([h_lower, 150, 150], dtype=np.uint8)
+            upper_bound = np.array([h_upper, 255, 255], dtype=np.uint8)
+            return cv2.inRange(hsv, lower_bound, upper_bound)
+        else:
+            lower_bound1 = np.array([h_lower, 0, 0], dtype=np.uint8)
+            upper_bound1 = np.array([180, 255, 255], dtype=np.uint8)
+            lower_bound2 = np.array([0, 0, 0], dtype=np.uint8)
+            upper_bound2 = np.array([h_upper - 180, 255, 255], dtype=np.uint8)
+            mask1 = cv2.inRange(hsv, lower_bound1, upper_bound1)
+            mask2 = cv2.inRange(hsv, lower_bound2, upper_bound2)
+            return cv2.bitwise_or(mask1, mask2)
 
     def detect_parking_spaces(self, frame: np.ndarray, green_mask: np.ndarray) -> List[ParkingSpace]:
         contours, _ = cv2.findContours(green_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
