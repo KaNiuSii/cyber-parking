@@ -8,8 +8,8 @@ from models.data import Data, CarPosition
 from consts import Consts
 
 class CarNames(IEffect):
-    ACCEPTED_Y_DIFF = 10
-    ACCEPTED_X_DIFF = 10
+    ACCEPTED_Y_DIFF = 100
+    ACCEPTED_X_DIFF = 100
 
     def __init__(self):
         self.car_number = 0
