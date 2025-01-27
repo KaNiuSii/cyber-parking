@@ -1,59 +1,3 @@
-# from fastapi import Body
-
-# from typing import List
-# from fastapi import FastAPI, HTTPException
-# from models.data import Data
-# from models.parking_space import ParkingSpace
-# from models.car_position import CarPosition
-# from models.server_response import ServerResponse
-# from workers.iworker import IWorker
-# from workers.parked import Parked
-# from workers.parked_names import ParkedNames
-# from workers.not_moving import NotMoving
-
-
-# app = FastAPI()
-
-# data_store: List[List[Data]] = []
-
-# workers: List[IWorker] = [
-#     Parked(),
-#     NotMoving(),
-#     ParkedNames()
-# ]
-
-
-# @app.post("/create_parking_data")
-# async def create_parking_data(
-#     parking_spaces: List[ParkingSpace] = Body(...),
-#     car_positions: List[CarPosition] = Body(...)
-# ):
-#     new_data = Data(
-#         id=len(data_store),
-#         parking_spaces=parking_spaces,
-#         car_positions=car_positions,
-#         server_response=ServerResponse(parked=0, not_moving=[], parked_names=[])
-#     )
-#     data_store.append([new_data])
-#     return {"data": new_data}
-
-
-# @app.post("/update_parking_data")
-# async def update_parking_data(new_data: Data):
-#     if new_data.id >= len(data_store) or not data_store[new_data.id]:
-#         raise HTTPException(status_code=404, detail="No parking data exists to update")
-
-#     data_chain: List[Data] = data_store[new_data.id]
-
-#     for worker in workers:
-#         new_data = worker.apply(data_chain=data_chain, new_data=new_data)
-
-#     data_store[new_data.id].append(new_data)
-#     return {"data": new_data}
-
-
-
-
 from typing import List
 from fastapi import FastAPI, HTTPException, Body
 import asyncio
@@ -63,6 +7,7 @@ from models.data import Data
 from models.car_position import CarPosition
 from models.parking_space import ParkingSpace
 from models.server_response import ServerResponse
+from models.parking_space import ParkingSpace
 
 from workers.iworker import IWorker
 from workers.parked import Parked
@@ -70,7 +15,7 @@ from workers.parked_names import ParkedNames
 from workers.not_moving import NotMoving
 
 from logic.database import create_tables, insert_or_update_car_position
-from logic.database import insert_parking_event_log
+from logic.database import insert_parking_event_log, clear_database
 
 app = FastAPI()
 
@@ -89,6 +34,7 @@ workers: List[IWorker] = [
 @app.on_event("startup")
 async def startup_event():
     create_tables()
+    clear_database()
     asyncio.create_task(store_positions_periodically())
 
 
@@ -97,15 +43,55 @@ async def clear_data_store():
     data_store.clear()
     return {"message": "data_store cleared"}
 
-
-
 async def store_positions_periodically():
+    frame_counter = 0
     while True:
         try:
-            store_current_positions_in_db()
+            if data_store and data_store[-1]:
+                last_data = data_store[-1][-1]
+                now = datetime.datetime.now().isoformat(timespec='seconds')
+                
+                data_obj = Data(
+                    id=frame_counter,
+                    parking_spaces=last_data.parking_spaces,
+                    car_positions=last_data.car_positions,
+                    server_response=last_data.server_response
+                )
+                try:
+                    insert_parking_event_log(
+                        frame_id=frame_counter,
+                        timestamp=now,
+                        data=data_obj
+                    )
+                    frame_counter += 1
+                except Exception as e:
+                    print(f"Error inserting parking log: {e}")
+                    
         except Exception as e:
-            print(f"Wystąpił błąd przy zapisywaniu pozycji: {e}")
+            print(f"Error in periodic storage: {e}")
         await asyncio.sleep(3)
+
+
+
+def is_car_in_space(car: CarPosition, space: ParkingSpace) -> bool:
+    car_box = {
+        'x1': car.x - car.w//2,
+        'y1': car.y - car.h//2,
+        'x2': car.x + car.w//2,
+        'y2': car.y + car.h//2
+    }
+    
+    space_box = {
+        'x1': space.x - space.w//2,
+        'y1': space.y - space.h//2,
+        'x2': space.x + space.w//2,
+        'y2': space.y + space.h//2
+    }
+    
+    return not (car_box['x2'] < space_box['x1'] or 
+                space_box['x2'] < car_box['x1'] or 
+                car_box['y2'] < space_box['y1'] or 
+                space_box['y2'] < car_box['y1'])
     
 def store_current_positions_in_db():
     global last_logged_data_id
@@ -155,15 +141,11 @@ async def create_parking_data(
 
 @app.post("/update_parking_data")
 async def update_parking_data(new_data: Data):
-    if new_data.id >= len(data_store) or not data_store[new_data.id]:
-        raise HTTPException(status_code=404, detail="No parking data exists to update")
-
-    data_chain: List[Data] = data_store[new_data.id]
-
+    data_store[new_data.id].append(new_data)
     for worker in workers:
-        new_data = worker.apply(data_chain=data_chain, new_data=new_data)
+        new_data = worker.apply(data_chain=data_store[new_data.id],
+                                new_data=new_data)
 
-    data_chain.append(new_data)
     return {"data": new_data}
 
 @app.post("/update_positions")
