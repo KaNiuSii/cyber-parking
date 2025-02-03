@@ -8,16 +8,23 @@ from effects.ieffect import IEffect
 from collections import defaultdict
 from models.data_frame import DataFrame
 from models.license_plate import LicensePlate
+from enum import Enum
 
 ACCEPTED_FORMAT = re.compile(r'^[A-Z]{3}\d{4}$')
 NOT_DETECTED_BUFFER = 10
+
+class operatingMode(Enum):
+    enterance = 1
+    exit = 2
+
     
 class LicenseDetector(IEffect):
-    def __init__(self):
+    def __init__(self, operatingMode = operatingMode.enterance):
         self.reader = Reader(['en'], gpu=True)
         self.frameCounter = 0
         self.detectionsHistory = []
         self.lastFrameWithDetection = 0
+        self.operatingMode = operatingMode
         
     def apply(self, frame: Optional[np.ndarray], dataframes: List[DataFrame]) -> DataFrame:
         if frame is None:
@@ -28,11 +35,14 @@ class LicenseDetector(IEffect):
         
         if self.check_for_detection_timeout():
             final_license_plate = self.get_license_plate()
-            processed_data.license_plates.append(final_license_plate)
+            if operatingMode.enterance == self.operatingMode:
+                processed_data.enterance_license_plates.append(final_license_plate)
+            else:
+                processed_data.exit_license_plates.append(final_license_plate)
+                
             print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
         
         if self.checkForRedOnScreen(frame) is False:
-            updated_data = dataframes[-1]
             return DataFrame(frame=frame, data=processed_data)
         
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -44,8 +54,7 @@ class LicenseDetector(IEffect):
 
         if not license_plate_text:
             print("No text detected. Skipping frame.")
-            updated_data = dataframes[-1]
-            return DataFrame(frame=frame, data=updated_data.data)
+            return DataFrame(frame=frame, data=processed_data)
 
         processed_license_plate_text = self.process_license_plate(license_plate_text)
         
@@ -54,13 +63,11 @@ class LicenseDetector(IEffect):
 
         print("Detected License Plate Text:", processed_license_plate_text, " Plate before processing:", license_plate_text)
 
-        updated_data = dataframes[-1]
-        return DataFrame(frame=detected_frame, data=updated_data.data)
+        return DataFrame(frame=detected_frame, data=processed_data)
 
     def create_dark_mask(self, hsv: np.ndarray) -> np.ndarray:
-        # Threshold for dark areas (low V values in HSV)
-        lower_bound = np.array([0, 0, 0], dtype=np.uint8)  # Minimum H, S, V
-        upper_bound = np.array([180, 255, 40], dtype=np.uint8)  # Max H, max S, low V threshold
+        lower_bound = np.array([0, 0, 0], dtype=np.uint8)
+        upper_bound = np.array([180, 255, 40], dtype=np.uint8)
         return cv2.inRange(hsv, lower_bound, upper_bound)
     
 

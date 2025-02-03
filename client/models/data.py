@@ -11,7 +11,8 @@ class Data(BaseModel):
     parking_spaces: List[ParkingSpace]
     car_positions: List[CarPosition]
     server_response: ServerResponse
-    license_plates: List[LicensePlate] = []
+    enterance_license_plates: List[LicensePlate]
+    exit_license_plates: List[LicensePlate]
 
     class Config:
         json_encoders = {

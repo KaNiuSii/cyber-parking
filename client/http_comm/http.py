@@ -15,7 +15,9 @@ class Http:
     def initialize_parking_data() -> int:
         initial_data = {
             "parking_spaces": [],
-            "car_positions": []
+            "car_positions": [],
+            "enterance_license_plates": [],
+            "exit_license_plates": [],
         }
 
         response = requests.post(
