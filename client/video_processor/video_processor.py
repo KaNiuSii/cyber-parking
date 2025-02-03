@@ -5,6 +5,7 @@ import requests
 from effects.car_names import CarNames
 from effects.car_positions import CarPositions
 from effects.parking_spaces import ParkingSpaces
+from effects.license_detection import LicenseDetector
 from video_processor.video import Video
 from video_processor.server_response_frame import ServerResponseFrame
 from models.data_frame import DataFrame
@@ -60,9 +61,10 @@ class VideoProcessor:
 
     def register_effects(self) -> List[IEffect]:
         return [
-            CarPositions(),
-            ParkingSpaces(),
-            CarNames()
+            LicenseDetector()
+            # CarPositions(),
+            # ParkingSpaces(),
+            # CarNames()
         ]
     
     
