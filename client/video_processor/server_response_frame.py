@@ -15,6 +15,7 @@ class ServerResponseFrame:
         line_height = 20
         margin = 10
 
+        # to do: fix line wrapping, its not working for 2+ lincense plates
         for key, value in text_data.items():
             if isinstance(value, list):
                 value_str = " | ".join(map(str, value))
@@ -25,7 +26,8 @@ class ServerResponseFrame:
 
             text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)[0]
             max_text_width = frame_width - 2 * margin
-            while text_size[0] > max_text_width:
+            current_line_width = text_size[0]
+            while current_line_width > max_text_width:
                 split_idx = text[:max_text_width // 7].rfind(' ')
                 wrapped_line = text[:split_idx]
                 remaining_line = text[split_idx + 1:]
@@ -43,6 +45,9 @@ class ServerResponseFrame:
 
                 text = remaining_line
                 text_size = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)[0]
+                current_line_width = text_size[0]
+            
+            
 
             cv2.putText(
                 response_frame,
