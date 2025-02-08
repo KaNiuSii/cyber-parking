@@ -184,7 +184,7 @@ def find_combined_roi(image , debug_mode=False):
     
     #IMAGE TRIMMING
     #trim pixels from the bottom
-    # combined_mask[-200:] = 0
+    combined_mask[-200:] = 0
     #trim pixels from the top
     # combined_mask[:200] = 0
     #trim pixels from the left
