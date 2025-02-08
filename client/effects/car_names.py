@@ -6,6 +6,7 @@ from colors import Colors
 from models.data_frame import DataFrame
 from models.data import Data, CarPosition
 from consts import Consts
+from video_processor.data_holder import DataHolder
 
 class CarNames(IEffect):
     ACCEPTED_Y_DIFF = 100
@@ -59,7 +60,8 @@ class CarNames(IEffect):
                         break
 
                 if car_position.name == Consts.UNKNOWN:
-                    car_position.name = f"Car {self.car_number}"
+                    plate = DataHolder.get_next()
+                    car_position.name = plate
                     self.car_number += 1
 
         self.lost_cars.extend(cars_not_found)

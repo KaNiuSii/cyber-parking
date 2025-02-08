@@ -17,15 +17,15 @@ from http_comm.http import Http
 
 
 class VideoProcessor:
-    def __init__(self, video_path: str):
+    def __init__(self, video_path: str, flag: int, id: int):
         self.video: Video = Video(video_path)
         self.video.open_video()
+        self.flag = flag #flag
         self.effects: List[IEffect] = self.register_effects()
         self.dataframes: List[DataFrame] = []
-        self.data_id = None
+        self.data_id = id
 
     def process(self):
-        self.data_id = Http.initialize_parking_data()
         while True:
             frame = self.video.get_next_frame()
             if frame is None:
@@ -63,11 +63,11 @@ class VideoProcessor:
         self.video.close_video()
 
     def register_effects(self) -> List[IEffect]:
-        return [
-            LicenseDetector(operatingMode.enterance),
-            # CarPositions(),
-            # ParkingSpaces(),
-            # CarNames()
-        ]
+        if self.flag == 1:
+            return [CarPositions(), ParkingSpaces(), CarNames()]
+        elif self.flag == 0:
+            return [LicenseDetector(operatingMode.enterance)]
+        else:
+            return [LicenseDetector(operatingMode.exit)]
     
     

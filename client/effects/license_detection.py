@@ -9,6 +9,7 @@ from collections import defaultdict
 from models.data_frame import DataFrame
 from models.license_plate import LicensePlate
 from enum import Enum
+from video_processor.data_holder import DataHolder
 
 ACCEPTED_FORMAT = re.compile(r'^[A-Z]{3}\d{4}$')
 NOT_DETECTED_BUFFER = 10
@@ -62,7 +63,7 @@ class LicenseDetector(IEffect):
         if roi is not None:
             x1, y1, x2, y2 = roi
             cropped_image = frame[y1:y2, x1:x2]
-            cv2.imshow('ROI', cropped_image)
+            # cv2.imshow('ROI', cropped_image)
         else: 
             return DataFrame(frame=roi, data=processed_data)
 
@@ -77,6 +78,9 @@ class LicenseDetector(IEffect):
         self.lastFrameWithDetection = self.frameCounter
 
         print("Detected License Plate Text:", processed_license_plate_text, " Plate before processing:", license_plate_text)
+
+        if self.operatingMode == operatingMode.enterance:
+            DataHolder.add(processed_license_plate_text)
 
         return DataFrame(frame=frame, data=processed_data)
     
@@ -180,7 +184,7 @@ def find_combined_roi(image , debug_mode=False):
     
     #IMAGE TRIMMING
     #trim pixels from the bottom
-    combined_mask[-200:] = 0
+    # combined_mask[-200:] = 0
     #trim pixels from the top
     # combined_mask[:200] = 0
     #trim pixels from the left

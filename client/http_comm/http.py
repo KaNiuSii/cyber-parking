@@ -29,7 +29,7 @@ class Http:
         print(f"Initialized parking data with ID: {server_data.id}")
         
         return server_data.id
-
+    
     @staticmethod
     def update_parking_data(data: Data) -> Data:
         # Convert to dict and use custom encoder
