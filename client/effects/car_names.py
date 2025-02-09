@@ -62,7 +62,7 @@ class CarNames(IEffect):
                         break
 
                 if car_position.name == Consts.UNKNOWN:
-                    plate = DataHolder.get_next()
+                    plate = DataHolder.get_next().number
                     car_position.name = plate
                     self.car_number += 1
 

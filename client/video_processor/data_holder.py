@@ -1,22 +1,23 @@
 from typing import List
 from consts import Consts
+from models.license_plate import LicensePlate
 
-entrance_queue: List[str] = []
-exit_queue: List[str] = []
+entrance_queue: List[LicensePlate] = []
+exit_queue: List[LicensePlate] = []
 
 
 class DataHolder:
     @staticmethod
-    def add(name: str):
-        print("Adding to queue:", name)
-        entrance_queue.append(name)
+    def add(license: LicensePlate):
+        print("Adding to queue:", license.number)
+        entrance_queue.append(license)
 
     @staticmethod
     def get_next():
         if len(entrance_queue) == 0:
-            return Consts.UNKNOWN 
+            return LicensePlate(number=Consts.UNKNOWN, arrival_time=0)
         output = entrance_queue.pop(0)
-        print("Returning from queue:", output)
+        print("Returning from queue:", output.number)
         print("Queue:", entrance_queue)
         return output
     
@@ -26,7 +27,7 @@ class DataHolder:
         print("Queue cleared")
         
     @staticmethod
-    def add_exit(name: str):
-        print("Adding to exit queue:", name)
-        exit_queue.append(name)
+    def add_exit(license: LicensePlate):
+        print("Adding to exit queue:", license.number)
+        exit_queue.append(license)
     

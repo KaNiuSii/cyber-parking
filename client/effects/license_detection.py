@@ -48,11 +48,11 @@ class LicenseDetector(IEffect):
             final_license_plate = self.get_final_license_plate()
             if operatingMode.enterance == self.operatingMode and final_license_plate is not None:
                 processed_data.enterance_license_plates.append(final_license_plate)
-                DataHolder.add(final_license_plate.number)
+                DataHolder.add(final_license_plate)
                 #print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
             elif operatingMode.exit == self.operatingMode and final_license_plate is not None:
                 processed_data.exit_license_plates.append(final_license_plate)
-                DataHolder.add_exit(final_license_plate.number)
+                DataHolder.add_exit(final_license_plate)
                 #print("\n\n Final License Plate:", final_license_plate.number, "Exit Time:", final_license_plate.arrival_time, "\n\n")
             
         
