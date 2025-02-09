@@ -1,3 +1,5 @@
+import asyncio
+import time
 from typing import List
 import cv2
 import numpy as np
@@ -14,18 +16,23 @@ from models.data import Data
 from models.server_response import ServerResponse
 from effects.ieffect import IEffect
 from http_comm.http import Http
+from video_processor.data_holder import DataHolder
 
 
 class VideoProcessor:
-    def __init__(self, video_path: str):
+    def __init__(self, video_path: str, flag: int, id: int):
         self.video: Video = Video(video_path)
         self.video.open_video()
+        self.flag = flag
         self.effects: List[IEffect] = self.register_effects()
         self.dataframes: List[DataFrame] = []
-        self.data_id = None
+        self.data_id = id
 
     def process(self):
-        self.data_id = Http.initialize_parking_data()
+        # if self.flag == 1:
+        #     print('waiting')
+        #     time.sleep(40)
+        #     print('going')
         while True:
             frame = self.video.get_next_frame()
             if frame is None:
@@ -49,13 +56,15 @@ class VideoProcessor:
                 dataframe = effect.apply(frame, self.dataframes)
                 self.dataframes.append(dataframe)
 
+            if self.flag == 1:
+                if cv2.waitKey(1) & 0xFF == ord('c'):
+                    DataHolder.clear()
+                
+                response = Http.update_parking_data(data=self.dataframes[-1].data)
+                response_frame = ServerResponseFrame.write_server_response(resp=response.server_response)
 
-            response = Http.update_parking_data(data=self.dataframes[-1].data)
-
-            response_frame = ServerResponseFrame.write_server_response(resp=response.server_response)
-
-            cv2.imshow('Main Frame', frame)
-            cv2.imshow('Server Response', response_frame)
+                cv2.imshow('Main Frame', frame)
+                cv2.imshow('Server Response', response_frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -63,11 +72,11 @@ class VideoProcessor:
         self.video.close_video()
 
     def register_effects(self) -> List[IEffect]:
-        return [
-            LicenseDetector(operatingMode.enterance),
-            # CarPositions(),
-            # ParkingSpaces(),
-            # CarNames()
-        ]
+        if self.flag == 1:
+            return [CarPositions(), ParkingSpaces(), CarNames()]
+        elif self.flag == 0:
+            return [LicenseDetector(operatingMode.enterance)]
+        else:
+            return [LicenseDetector(operatingMode.exit)]
     
     

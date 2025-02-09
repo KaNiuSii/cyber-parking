@@ -9,6 +9,7 @@ from collections import defaultdict
 from models.data_frame import DataFrame
 from models.license_plate import LicensePlate
 from enum import Enum
+from video_processor.data_holder import DataHolder
 
 ACCEPTED_FORMAT = re.compile(r'^[A-Z]{3}\d{4}$')
 NOT_DETECTED_BUFFER = 10
@@ -42,15 +43,17 @@ class LicenseDetector(IEffect):
         
         processed_data = dataframes[-1].data
         self.frameCounter += 1
-        
+        cv2.imshow('entrance' if self.operatingMode == operatingMode.enterance else 'exit', frame)
         if self.check_for_detection_timeout():
             final_license_plate = self.get_final_license_plate()
             if operatingMode.enterance == self.operatingMode and final_license_plate is not None:
                 processed_data.enterance_license_plates.append(final_license_plate)
-                print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
+                DataHolder.add(final_license_plate)
+                #print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
             elif operatingMode.exit == self.operatingMode and final_license_plate is not None:
                 processed_data.exit_license_plates.append(final_license_plate)
-                print("\n\n Final License Plate:", final_license_plate.number, "Exit Time:", final_license_plate.arrival_time, "\n\n")
+                DataHolder.add_exit(final_license_plate)
+                #print("\n\n Final License Plate:", final_license_plate.number, "Exit Time:", final_license_plate.arrival_time, "\n\n")
             
         
         if self.checkForRedOnScreen(frame) is False:
@@ -62,7 +65,7 @@ class LicenseDetector(IEffect):
         if roi is not None:
             x1, y1, x2, y2 = roi
             cropped_image = frame[y1:y2, x1:x2]
-            cv2.imshow('ROI', cropped_image)
+            # cv2.imshow('ROI', cropped_image)
         else: 
             return DataFrame(frame=roi, data=processed_data)
 
@@ -76,7 +79,7 @@ class LicenseDetector(IEffect):
         self.detectionsHistory.append(processed_license_plate_text)
         self.lastFrameWithDetection = self.frameCounter
 
-        print("Detected License Plate Text:", processed_license_plate_text, " Plate before processing:", license_plate_text)
+        #print("Detected License Plate Text:", processed_license_plate_text, " Plate before processing:", license_plate_text)
 
         return DataFrame(frame=frame, data=processed_data)
     
@@ -131,7 +134,7 @@ class LicenseDetector(IEffect):
         if not self.detectionsHistory or len(self.detectionsHistory) < 5:
             return None
         
-        print("License Plate History:", self.detectionsHistory)
+        #print("License Plate History:", self.detectionsHistory)
         
         first_part = [entry[:3] for entry in self.detectionsHistory]
         second_part = [entry[4:] for entry in self.detectionsHistory]
@@ -169,7 +172,7 @@ def find_combined_roi(image , debug_mode=False):
     red_mask = cv2.inRange(hsv, (0, 80, 50), (15, 255, 255)) | cv2.inRange(hsv, (160, 80, 50), (180, 255, 255))
     #white_mask = cv2.inRange(image, (200, 200, 200), (255, 255, 255))
     
-    cv2.imshow('red_mask', red_mask)
+    # cv2.imshow('red_mask', red_mask)
     #cv2.imshow('white_mask', white_mask)
     
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15,15))

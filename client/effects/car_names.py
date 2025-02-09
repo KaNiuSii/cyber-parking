@@ -6,6 +6,7 @@ from colors import Colors
 from models.data_frame import DataFrame
 from models.data import Data, CarPosition
 from consts import Consts
+from video_processor.data_holder import DataHolder
 
 class CarNames(IEffect):
     ACCEPTED_Y_DIFF = 100
@@ -32,7 +33,9 @@ class CarNames(IEffect):
             cv2.rectangle(frame, (car_position.x - car_position.w // 2, car_position.y - car_position.h // 2),
                           (car_position.x + car_position.w // 2, car_position.y + car_position.h // 2),
                           Colors.PURPLE_BGR, 2)
-            cv2.putText(frame, car_position.name, (car_position.x, car_position.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+            # print("Car name:", car_position.name)
+            nameString = str(car_position.name)
+            cv2.putText(frame, nameString, (car_position.x, car_position.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         Colors.PURPLE_BGR, 2)
 
         return frame
@@ -59,7 +62,8 @@ class CarNames(IEffect):
                         break
 
                 if car_position.name == Consts.UNKNOWN:
-                    car_position.name = f"Car {self.car_number}"
+                    plate = DataHolder.get_next().number
+                    car_position.name = plate
                     self.car_number += 1
 
         self.lost_cars.extend(cars_not_found)
