@@ -1,3 +1,4 @@
+import asyncio
 from typing import List
 import cv2
 import numpy as np
@@ -25,7 +26,9 @@ class VideoProcessor:
         self.dataframes: List[DataFrame] = []
         self.data_id = id
 
-    def process(self):
+    async def process(self):
+        if self.flag==1:
+            await asyncio.sleep( 5 )
         while True:
             frame = self.video.get_next_frame()
             if frame is None:
@@ -49,13 +52,12 @@ class VideoProcessor:
                 dataframe = effect.apply(frame, self.dataframes)
                 self.dataframes.append(dataframe)
 
+            if self.flag == 1:
+                response = await Http.update_parking_data(data=self.dataframes[-1].data)
+                response_frame = ServerResponseFrame.write_server_response(resp=response.server_response)
 
-            response = Http.update_parking_data(data=self.dataframes[-1].data)
-
-            response_frame = ServerResponseFrame.write_server_response(resp=response.server_response)
-
-            cv2.imshow('Main Frame', frame)
-            cv2.imshow('Server Response', response_frame)
+                cv2.imshow('Main Frame', frame)
+                cv2.imshow('Server Response', response_frame)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break

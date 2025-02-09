@@ -48,10 +48,11 @@ class LicenseDetector(IEffect):
             final_license_plate = self.get_final_license_plate()
             if operatingMode.enterance == self.operatingMode and final_license_plate is not None:
                 processed_data.enterance_license_plates.append(final_license_plate)
-                print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
+                DataHolder.add(final_license_plate)
+                #print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
             elif operatingMode.exit == self.operatingMode and final_license_plate is not None:
                 processed_data.exit_license_plates.append(final_license_plate)
-                print("\n\n Final License Plate:", final_license_plate.number, "Exit Time:", final_license_plate.arrival_time, "\n\n")
+                #print("\n\n Final License Plate:", final_license_plate.number, "Exit Time:", final_license_plate.arrival_time, "\n\n")
             
         
         if self.checkForRedOnScreen(frame) is False:
@@ -77,10 +78,7 @@ class LicenseDetector(IEffect):
         self.detectionsHistory.append(processed_license_plate_text)
         self.lastFrameWithDetection = self.frameCounter
 
-        print("Detected License Plate Text:", processed_license_plate_text, " Plate before processing:", license_plate_text)
-
-        if self.operatingMode == operatingMode.enterance:
-            DataHolder.add(processed_license_plate_text)
+        #print("Detected License Plate Text:", processed_license_plate_text, " Plate before processing:", license_plate_text)
 
         return DataFrame(frame=frame, data=processed_data)
     
@@ -135,7 +133,7 @@ class LicenseDetector(IEffect):
         if not self.detectionsHistory or len(self.detectionsHistory) < 5:
             return None
         
-        print("License Plate History:", self.detectionsHistory)
+        #print("License Plate History:", self.detectionsHistory)
         
         first_part = [entry[:3] for entry in self.detectionsHistory]
         second_part = [entry[4:] for entry in self.detectionsHistory]

@@ -31,7 +31,7 @@ class Http:
         return server_data.id
     
     @staticmethod
-    def update_parking_data(data: Data) -> Data:
+    async def update_parking_data(data: Data) -> Data:
         # Convert to dict and use custom encoder
         update_payload = data.model_dump()
         json_payload = json.dumps(update_payload, cls=DateTimeEncoder)

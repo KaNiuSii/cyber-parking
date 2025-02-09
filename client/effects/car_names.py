@@ -33,7 +33,9 @@ class CarNames(IEffect):
             cv2.rectangle(frame, (car_position.x - car_position.w // 2, car_position.y - car_position.h // 2),
                           (car_position.x + car_position.w // 2, car_position.y + car_position.h // 2),
                           Colors.PURPLE_BGR, 2)
-            cv2.putText(frame, car_position.name, (car_position.x, car_position.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+            print("Car name:", car_position.name)
+            nameString = str(car_position.name)
+            cv2.putText(frame, nameString, (car_position.x, car_position.y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                         Colors.PURPLE_BGR, 2)
 
         return frame
