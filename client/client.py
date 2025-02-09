@@ -10,7 +10,7 @@ async def process_video(file_name: str, flag: int, id: int):
 async def main():
     id: int = Http.initialize_parking_data()
     
-    video_files = ['wjazd.mp4', 'filmgora.mp4']
+    video_files = ['goranocrop.mp4', 'filmikzgory.mp4', 'noscroppedwyjazd.mp4']
     
     # Create tasks for each video file
     tasks = []

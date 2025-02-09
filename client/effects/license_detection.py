@@ -43,9 +43,7 @@ class LicenseDetector(IEffect):
         
         processed_data = dataframes[-1].data
         self.frameCounter += 1
-        if not self.frameCounter % 5 == 0:
-            return dataframes[-1]
-        cv2.imshow('palte', frame)
+        cv2.imshow('entrance' if self.operatingMode == operatingMode.enterance else 'exit', frame)
         if self.check_for_detection_timeout():
             final_license_plate = self.get_final_license_plate()
             if operatingMode.enterance == self.operatingMode and final_license_plate is not None:
@@ -54,6 +52,7 @@ class LicenseDetector(IEffect):
                 #print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
             elif operatingMode.exit == self.operatingMode and final_license_plate is not None:
                 processed_data.exit_license_plates.append(final_license_plate)
+                DataHolder.add_exit(final_license_plate.number)
                 #print("\n\n Final License Plate:", final_license_plate.number, "Exit Time:", final_license_plate.arrival_time, "\n\n")
             
         

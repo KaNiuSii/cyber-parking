@@ -16,6 +16,7 @@ from models.data import Data
 from models.server_response import ServerResponse
 from effects.ieffect import IEffect
 from http_comm.http import Http
+from video_processor.data_holder import DataHolder
 
 
 class VideoProcessor:
@@ -56,6 +57,9 @@ class VideoProcessor:
                 self.dataframes.append(dataframe)
 
             if self.flag == 1:
+                if cv2.waitKey(1) & 0xFF == ord('c'):
+                    DataHolder.clear()
+                
                 response = Http.update_parking_data(data=self.dataframes[-1].data)
                 response_frame = ServerResponseFrame.write_server_response(resp=response.server_response)
 
