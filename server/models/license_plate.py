@@ -5,6 +5,7 @@ from typing import Dict, Any
 class LicensePlate(BaseModel):
     number: str
     arrival_time: datetime
+    confidence: float
 
     def dict(self, *args, **kwargs) -> Dict[str, Any]:
         d = super().dict(*args, **kwargs)
