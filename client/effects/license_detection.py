@@ -43,12 +43,14 @@ class LicenseDetector(IEffect):
         
         processed_data = dataframes[-1].data
         self.frameCounter += 1
-        
+        if not self.frameCounter % 5 == 0:
+            return dataframes[-1]
+        cv2.imshow('palte', frame)
         if self.check_for_detection_timeout():
             final_license_plate = self.get_final_license_plate()
             if operatingMode.enterance == self.operatingMode and final_license_plate is not None:
                 processed_data.enterance_license_plates.append(final_license_plate)
-                DataHolder.add(final_license_plate)
+                DataHolder.add(final_license_plate.number)
                 #print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
             elif operatingMode.exit == self.operatingMode and final_license_plate is not None:
                 processed_data.exit_license_plates.append(final_license_plate)
@@ -171,7 +173,7 @@ def find_combined_roi(image , debug_mode=False):
     red_mask = cv2.inRange(hsv, (0, 80, 50), (15, 255, 255)) | cv2.inRange(hsv, (160, 80, 50), (180, 255, 255))
     #white_mask = cv2.inRange(image, (200, 200, 200), (255, 255, 255))
     
-    cv2.imshow('red_mask', red_mask)
+    # cv2.imshow('red_mask', red_mask)
     #cv2.imshow('white_mask', white_mask)
     
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15,15))

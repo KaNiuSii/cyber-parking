@@ -5,12 +5,12 @@ from http_comm.http import Http
 
 async def process_video(file_name: str, flag: int, id: int):
     video_processor = VideoProcessor(file_name, flag, id)
-    await video_processor.process()
+    await asyncio.to_thread(video_processor.process)
 
 async def main():
     id: int = Http.initialize_parking_data()
     
-    video_files = ['goranocrop.mp4', 'filmikzgory.mp4']
+    video_files = ['wjazd.mp4', 'filmgora.mp4']
     
     # Create tasks for each video file
     tasks = []

@@ -1,4 +1,5 @@
 import asyncio
+import time
 from typing import List
 import cv2
 import numpy as np
@@ -21,14 +22,16 @@ class VideoProcessor:
     def __init__(self, video_path: str, flag: int, id: int):
         self.video: Video = Video(video_path)
         self.video.open_video()
-        self.flag = flag #flag
+        self.flag = flag
         self.effects: List[IEffect] = self.register_effects()
         self.dataframes: List[DataFrame] = []
         self.data_id = id
 
-    async def process(self):
-        if self.flag==1:
-            await asyncio.sleep( 5 )
+    def process(self):
+        # if self.flag == 1:
+        #     print('waiting')
+        #     time.sleep(40)
+        #     print('going')
         while True:
             frame = self.video.get_next_frame()
             if frame is None:
@@ -53,7 +56,7 @@ class VideoProcessor:
                 self.dataframes.append(dataframe)
 
             if self.flag == 1:
-                response = await Http.update_parking_data(data=self.dataframes[-1].data)
+                response = Http.update_parking_data(data=self.dataframes[-1].data)
                 response_frame = ServerResponseFrame.write_server_response(resp=response.server_response)
 
                 cv2.imshow('Main Frame', frame)

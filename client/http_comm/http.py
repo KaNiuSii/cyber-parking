@@ -29,9 +29,9 @@ class Http:
         print(f"Initialized parking data with ID: {server_data.id}")
         
         return server_data.id
-    
+
     @staticmethod
-    async def update_parking_data(data: Data) -> Data:
+    def update_parking_data(data: Data) -> Data:
         # Convert to dict and use custom encoder
         update_payload = data.model_dump()
         json_payload = json.dumps(update_payload, cls=DateTimeEncoder)
