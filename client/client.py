@@ -68,7 +68,7 @@ async def async_main():
     # Initialize parking data on the server.
     id: int = Http.initialize_parking_data()
     
-    video_files = ['wjazd.mp4', 'gora1.mp4', 'wyjazd.mp4']
+    video_files = ["http://172.20.10.5:4746/video", "http://172.20.10.6:4747/video"]
     
     # Create an async task for each video file.
     tasks = []
