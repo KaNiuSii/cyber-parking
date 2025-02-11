@@ -24,6 +24,8 @@ IGNORE_READINGS = {
     "Pl ",
     "pL ",
     "pl ",
+    "p",
+    "P"
 }
 
 class operatingMode(Enum):
@@ -45,7 +47,7 @@ class LicenseDetector(IEffect):
         
         processed_data = dataframes[-1].data
         self.frameCounter += 1
-        # cv2.imshow('entrance' if self.operatingMode == operatingMode.enterance else 'exit', frame)
+        cv2.imshow('entrance' if self.operatingMode == operatingMode.enterance else 'exit', frame)
         if self.check_for_detection_timeout():
             final_license_plate = self.get_final_license_plate()
             if operatingMode.enterance == self.operatingMode and final_license_plate is not None:
@@ -75,6 +77,8 @@ class LicenseDetector(IEffect):
         if roi is not None:
             x1, y1, x2, y2 = roi
             cropped_image = frame[y1:y2, x1:x2]
+            if self.operatingMode == operatingMode.enterance:
+                cv2.imshow('ROI', cropped_image)
             # cv2.imshow('ROI', cropped_image)
         else: 
             return DataFrame(frame=roi, data=processed_data)
@@ -193,7 +197,7 @@ def find_combined_roi(image , debug_mode=False):
     
     #IMAGE TRIMMING
     #trim pixels from the bottom
-    combined_mask[-200:] = 0
+    # combined_mask[-200:] = 0
     #trim pixels from the top
     # combined_mask[:200] = 0
     #trim pixels from the left

@@ -20,7 +20,7 @@ class CarPositions(IEffect):
         any_but_parking_mask = cv2.bitwise_or(any_but_parking_mask1, any_but_parking_mask2)
         any_but_parking_mask = cv2.morphologyEx(any_but_parking_mask, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
 
-        # cv2.imshow('co widzi bez parkingu', parking_mask)
+        # cv2.imshow('co widzi bez parkingu', any_but_parking_mask)
 
         detected_frame, car_positions = self.detect_car_positions(frame, any_but_parking_mask)
 
@@ -31,13 +31,13 @@ class CarPositions(IEffect):
 
     def create_mask(self, hsv: np.ndarray, h_lower: int, h_upper: int) -> np.ndarray:
         if h_lower <= h_upper:
-            lower_bound = np.array([h_lower, 0, 0], dtype=np.uint8)
+            lower_bound = np.array([h_lower, 150, 150], dtype=np.uint8)
             upper_bound = np.array([h_upper, 255, 255], dtype=np.uint8)
             return cv2.inRange(hsv, lower_bound, upper_bound)
         else:
-            lower_bound1 = np.array([h_lower, 0, 0], dtype=np.uint8)
+            lower_bound1 = np.array([h_lower, 150, 150], dtype=np.uint8)
             upper_bound1 = np.array([180, 255, 255], dtype=np.uint8)
-            lower_bound2 = np.array([0, 0, 0], dtype=np.uint8)
+            lower_bound2 = np.array([0, 150, 150], dtype=np.uint8)
             upper_bound2 = np.array([h_upper - 180, 255, 255], dtype=np.uint8)
             mask1 = cv2.inRange(hsv, lower_bound1, upper_bound1)
             mask2 = cv2.inRange(hsv, lower_bound2, upper_bound2)
@@ -49,7 +49,7 @@ class CarPositions(IEffect):
         car_positions = []
 
         for contour in contours:
-            if cv2.contourArea(contour) > 5_000 and cv2.contourArea(contour) < 20_000:
+            if cv2.contourArea(contour) > 500 and cv2.contourArea(contour) < 5000:
                 x, y, w, h = cv2.boundingRect(contour)
                 car_position = CarPosition(name=Consts.UNKNOWN, x=x + w // 2, y=y + h // 2, w=w, h=h)
                 car_positions.append(car_position)
