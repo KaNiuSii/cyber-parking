@@ -1,5 +1,6 @@
 from typing import List, Optional
 import cv2
+import time
 import numpy as np
 import re
 from datetime import datetime
@@ -10,6 +11,7 @@ from models.data_frame import DataFrame
 from models.license_plate import LicensePlate
 from enum import Enum
 from video_processor.data_holder import DataHolder
+from http_comm.http import Http
 
 ACCEPTED_FORMAT = re.compile(r'^[A-Z]{3}\d{4}$')
 NOT_DETECTED_BUFFER = 10
@@ -43,19 +45,27 @@ class LicenseDetector(IEffect):
         
         processed_data = dataframes[-1].data
         self.frameCounter += 1
-        cv2.imshow('entrance' if self.operatingMode == operatingMode.enterance else 'exit', frame)
+        # cv2.imshow('entrance' if self.operatingMode == operatingMode.enterance else 'exit', frame)
         if self.check_for_detection_timeout():
             final_license_plate = self.get_final_license_plate()
             if operatingMode.enterance == self.operatingMode and final_license_plate is not None:
                 processed_data.enterance_license_plates.append(final_license_plate)
                 DataHolder.add(final_license_plate)
-                #print("\n\n Final License Plate:", final_license_plate.number, "Arrival Time:", final_license_plate.arrival_time, "\n\n")
+                try:
+                    updated_data = Http.update_parking_data(processed_data)
+                    print(f"\nUpdated entry data for plate: {final_license_plate.number}\n")
+                except Exception as e:
+                    print(f"\nEntry update error for {final_license_plate.number}:", e, "\n")
             elif operatingMode.exit == self.operatingMode and final_license_plate is not None:
                 processed_data.exit_license_plates.append(final_license_plate)
                 DataHolder.add_exit(final_license_plate)
-                #print("\n\n Final License Plate:", final_license_plate.number, "Exit Time:", final_license_plate.arrival_time, "\n\n")
-            
-        
+                try:
+                    updated_data = Http.update_parking_data(processed_data)
+                    print(f"\nUpdated exit data for plate: {final_license_plate.number}\n")
+                except Exception as e:
+                    print(f"\nExit update error for {final_license_plate.number}:", e, "\n")
+
+
         if self.checkForRedOnScreen(frame) is False:
             return DataFrame(frame=frame, data=processed_data)
         
@@ -83,7 +93,7 @@ class LicenseDetector(IEffect):
 
         return DataFrame(frame=frame, data=processed_data)
     
-
+    
     def detect_license_plate(self, roi: np.ndarray):
         results = self.reader.readtext(roi)
 
