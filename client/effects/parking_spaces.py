@@ -14,10 +14,10 @@ class ParkingSpaces(IEffect):
 
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
-        green_mask = self.create_mask(hsv, 40, 85)
+        green_mask = self.create_mask(hsv, 35, 85)
         green_mask = cv2.morphologyEx(green_mask, cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
 
-        # cv2.imshow('xd', green_mask)
+        # cv2.imshow('Parking spaces', green_mask)
 
         detected_parking_spaces = self.detect_parking_spaces(frame, green_mask)
 
@@ -28,7 +28,7 @@ class ParkingSpaces(IEffect):
 
     def create_mask(self, hsv: np.ndarray, h_lower: int, h_upper: int) -> np.ndarray:
         if h_lower <= h_upper:
-            lower_bound = np.array([h_lower, 150, 150], dtype=np.uint8)
+            lower_bound = np.array([h_lower, 100, 100], dtype=np.uint8)
             upper_bound = np.array([h_upper, 255, 255], dtype=np.uint8)
             return cv2.inRange(hsv, lower_bound, upper_bound)
         else:
@@ -45,7 +45,7 @@ class ParkingSpaces(IEffect):
         parking_spaces = []
 
         for contour in contours:
-            if cv2.contourArea(contour) > 2500:
+            if cv2.contourArea(contour) > 140:
                 x, y, w, h = cv2.boundingRect(contour)
                 position = (x + w // 2, y + h // 2)
 
