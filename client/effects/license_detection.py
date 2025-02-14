@@ -186,7 +186,7 @@ def find_combined_roi(image , debug_mode=False):
     red_mask = cv2.inRange(hsv, (0, 80, 50), (15, 255, 255)) | cv2.inRange(hsv, (160, 80, 50), (180, 255, 255))
     #white_mask = cv2.inRange(image, (200, 200, 200), (255, 255, 255))
     
-    # cv2.imshow('red_mask', red_mask)
+    #cv2.imshow('red_mask', red_mask)
     #cv2.imshow('white_mask', white_mask)
     
     kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (15,15))
